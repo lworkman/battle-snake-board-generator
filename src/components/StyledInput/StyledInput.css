@@ -1,0 +1,18 @@
+.styled-input {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.input-title {
+  margin-right: 5px;  
+}
+
+.styled-input input {
+  font-size: 1rem;
+  width: auto;
+  border-style: solid;
+  border-radius: 3px;
+  border-width: 2px;
+  padding-left: 5px;
+}

@@ -1,0 +1,16 @@
+.snake-control-container {
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.colour-cell {
+  height: 36px;
+  width: 36px;
+}
+
+.vertical-flex-container {
+  display: inline-flex;
+  flex-direction: column;
+}

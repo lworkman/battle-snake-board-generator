@@ -1,0 +1,27 @@
+.titled-container {
+  position: relative;
+  border: 3px solid;
+  padding: 10px;
+  margin-top: 20px;
+  min-height: 50px;
+  min-width: 200px;
+  display: inline-block;
+}
+
+.container-title {
+  position: absolute;
+  top: -13px;
+  left: 5px;
+  margin: 0px;
+  font-weight: 500;
+  padding: 0 10px;
+  background-color: white;
+  font-size: 1.2rem;
+  line-height: 1.2rem;
+}
+
+@media only screen and (max-width: 768px) {
+  .titled-container {
+    display: block;
+  }
+}
