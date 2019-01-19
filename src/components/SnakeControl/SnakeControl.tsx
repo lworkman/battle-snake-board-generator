@@ -3,6 +3,7 @@ import "./SnakeControl.css";
 import { StyledInput } from "../StyledInput/StyledInput";
 import { StyledButton } from "../StyledButton/StyledButton";
 import { onChangeNumberLimitFactory } from "../../shared/utils";
+import { ColourSquare } from "../ColourSquare/ColourSquare";
 
 export interface ISnakeControl {
   colour: string;
@@ -21,7 +22,7 @@ export class SnakeControl extends React.Component<ISnakeControl, {}> {
     return (
       <div className="snake-control-container">
         <StyledButton onClick={selectSnake}>
-          <div className="colour-cell" style={{ backgroundColor: colour }}></div>
+          <ColourSquare colour={colour} />
         </StyledButton>
         <div className="vertical-flex-container">
           <span>{colour}</span>

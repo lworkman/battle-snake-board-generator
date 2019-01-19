@@ -12,6 +12,7 @@ import { StyledButton } from './components/StyledButton/StyledButton';
 import { generateColour, generateId } from './shared/utils';
 import { TestSnake } from './components/TestSnake/TestSnake';
 import { CenteredRow } from './components/CenteredRow/CenteredRow';
+import { ColourSquare } from './components/ColourSquare/ColourSquare';
 
 interface IAppState {
   id: string;
@@ -28,6 +29,7 @@ interface IAppState {
     colour: string;
     body: ICoordinate[];
     health: string;
+    id: "you";
   };
   mode: "food" | "you" | "snake";
   chosenId: string;
@@ -35,9 +37,6 @@ interface IAppState {
 }
 
 class App extends Component<{}, IAppState> {
-
-  public boardState: IBoardState = { "game": { "id": "53ce0e07-b7e1-4266-a71f-0cb00584f622" }, "turn": 0, "board": { "height": 15, "width": 15, "food": [{ "x": 12, "y": 0 }, { "x": 1, "y": 8 }, { "x": 6, "y": 10 }, { "x": 3, "y": 3 }, { "x": 11, "y": 12 }, { "x": 13, "y": 3 }, { "x": 8, "y": 13 }, { "x": 9, "y": 5 }, { "x": 9, "y": 7 }, { "x": 13, "y": 0 }], "snakes": [{ "id": "903e51d9-2861-43d9-94ce-08def08b2438", "name": "test", "health": 100, "body": [{ "x": 2, "y": 12 }, { "x": 2, "y": 12 }, { "x": 2, "y": 12 }] }, { "id": "2832cebd-1da0-4e90-a005-580bf4f5a5a2", "name": "test", "health": 100, "body": [{ "x": 5, "y": 6 }, { "x": 5, "y": 6 }, { "x": 5, "y": 6 }] }, { "id": "3fe73b73-bd25-49f8-9bf4-f3e570f466ce", "name": "test", "health": 100, "body": [{ "x": 8, "y": 10 }, { "x": 8, "y": 10 }, { "x": 8, "y": 10 }] }, { "id": "d97d8f6a-d813-4a26-b4d2-f76862c6b3fa", "name": "test", "health": 100, "body": [{ "x": 12, "y": 5 }, { "x": 12, "y": 5 }, { "x": 12, "y": 5 }] }] }, "you": { "id": "d97d8f6a-d813-4a26-b4d2-f76862c6b3fa", "name": "test", "health": 100, "body": [{ "x": 12, "y": 5 }, { "x": 12, "y": 5 }, { "x": 12, "y": 5 }] } };
-  public textAreaRef: HTMLTextAreaElement | null = null;
 
   constructor(props: {}) {
     super(props);
@@ -51,7 +50,8 @@ class App extends Component<{}, IAppState> {
       you: {
         colour: "#22aa34",
         body: [],
-        health: "100"
+        health: "100",
+        id: "you"
       },
       mode: "food",
       chosenId: "",
@@ -59,46 +59,93 @@ class App extends Component<{}, IAppState> {
     }
   }
 
-  selectCell = (x: number, y: number) => {
+  private findExistingCell = (id: string, x: number, y: number) => {
+    const { food, you, snakes } = this.state;
+
+    switch (id) {
+      case "food":
+        return {
+          id: "food",
+          index: food.findIndex(item => item.x === x && item.y === y)
+        };
+      case "you":
+        return {
+          id: "you",
+          index: you.body.findIndex(item => item.x === x && item.y === y)
+        };
+      case undefined:
+        return undefined;
+      default:
+        const snake = snakes.find(snake => snake.id === id);
+        if (snake) {
+          return {
+            id: id,
+            index: snake.body.findIndex(item => item.x === x && item.y === y)
+          };
+        }
+    }
+  }
+
+  private checkIfCellConnected: (x: number, y: number, body: ICoordinate[]) => boolean = (x, y, body) => {
+    return body.some(segment => (Math.abs(segment.x - x) === 1 && segment.y === y)|| (Math.abs(segment.y - y) === 1 && segment.x === x));
+  }
+
+
+
+  public selectCell = (x: number, y: number, id: string) => {
 
     const { mode, food, you, snakes, chosenId } = this.state;
-    let existingIndex: number;
+    let existingIndex: {
+      id: string;
+      index: number;
+    } | undefined = this.findExistingCell(id, x, y);
 
-    switch (mode) {
-      case "food":
-        existingIndex = food.findIndex(coor => coor.x === x && coor.y === y);
-        if (existingIndex !== -1) {
-          food.splice(existingIndex, 1);
-        } else {
+    if (existingIndex) {
+
+      const foundId: string = existingIndex.id;
+
+      switch (foundId) {
+        case "food":
+          food.splice(existingIndex.index, 1);
+          break;
+        case "you":
+          you.body.splice(existingIndex.index);
+          break;
+        default:
+          const matchingSnake = snakes.find(snake => snake.id === foundId);
+          if (matchingSnake) {
+            matchingSnake.body.splice(existingIndex.index)
+          }
+          break;
+      }
+    }
+
+    if (!existingIndex || (existingIndex.id !== mode && existingIndex.id !== chosenId)) {
+      switch (mode) {
+        case "food":
           food.push({ x, y });
-        }
-        break;
-      case "you":
-        existingIndex = you.body.findIndex(coor => coor.x === x && coor.y === y);
-        if (existingIndex !== -1) {
-          you.body.splice(existingIndex, 1);
-        } else {
-          you.body.unshift({ x, y });
-        }
-        break;
-      case "snake":
-        const matchingSnake = snakes.find(snake => snake.id === chosenId);
-        if (!matchingSnake) {
-          return;
-        }
-        existingIndex = matchingSnake.body.findIndex(coor => coor.x === x && coor.y === y);
-        if (existingIndex !== -1) {
-          matchingSnake.body.splice(existingIndex, 1);
-        } else {
-          matchingSnake.body.unshift({ x, y });
-        }
-        break;
+          break;
+        case "you":
+          if (you.body.length === 0 || this.checkIfCellConnected(x, y, you.body)) {
+            you.body.unshift({ x, y });
+          }
+          break;
+        case "snake":
+          const matchingSnake = snakes.find(snake => snake.id === chosenId);
+          if (!matchingSnake) {
+            return;
+          }
+          if (matchingSnake.body.length === 0 || this.checkIfCellConnected(x, y, matchingSnake.body)) {
+            matchingSnake.body.unshift({ x, y });
+          }
+          break;
+      }
     }
 
     this.setState({ mode, food, you, snakes, chosenId });
   }
 
-  buildBoardState: () => IBoardState = () => {
+  private buildBoardState: () => IBoardState = () => {
     return {
       game: {
         id: this.state.id
@@ -123,7 +170,8 @@ class App extends Component<{}, IAppState> {
       }
     }
   }
-  addSnake = () => {
+
+  public addSnake = () => {
     const colour = generateColour();
     const { snakes } = this.state;
     snakes.push({
@@ -136,60 +184,28 @@ class App extends Component<{}, IAppState> {
     this.setState({ snakes })
   }
 
-  selectSnake = (id: string) => {
+  public selectSnake = (id: string) => {
     this.setState({
       mode: "snake",
       chosenId: id
     });
   }
 
-  selectFood = () => {
+  public selectFood = () => {
     this.setState({
-      mode: "food"
+      mode: "food",
+      chosenId: ""
     });
   }
 
-  selectYou = () => {
+  public selectYou = () => {
     this.setState({
-      mode: "you"
+      mode: "you",
+      chosenId: ""
     });
   }
 
-  uploadBoard = (event: React.FormEvent<HTMLElement>) => {
-    event.preventDefault();
-    if (this.textAreaRef) {
-      let boardValue: IBoardState;
-      try {
-        boardValue = JSON.parse(this.textAreaRef.value);
-        this.setState({
-          height: boardValue.board.height.toString(),
-          width: boardValue.board.width.toString(),
-          food: boardValue.board.food,
-          snakes: boardValue.board.snakes.map(snake => {
-            const colour = generateColour();
-            return {
-              id: colour,
-              colour: colour,
-              body: snake.body,
-              health: snake.health.toString()
-            }
-          }),
-          you: {
-            colour: "#22aa34",
-            body: boardValue.you.body,
-            health: boardValue.you.health.toString()
-          },
-          mode: "food",
-          chosenId: ""
-        });
-      } catch {
-        return;
-      }
-    }
-  }
-
-
-  changeSnakeHealth = (health: string, targetSnakeId: "you" | string) => {
+  public changeSnakeHealth = (health: string, targetSnakeId: "you" | string) => {
     const { you, snakes } = this.state;
 
     if (targetSnakeId === "you") {
@@ -205,9 +221,9 @@ class App extends Component<{}, IAppState> {
     }
   }
 
-  changeBoardHeight = (height: string) => this.setState({ height });
+  public changeBoardHeight = (height: string) => this.setState({ height });
 
-  changeBoardWidth = (width: string) => this.setState({ width });
+  public changeBoardWidth = (width: string) => this.setState({ width });
 
   render() {
 
@@ -232,7 +248,7 @@ class App extends Component<{}, IAppState> {
           <TitledContainer title="Food">
             <CenteredRow>
               <StyledButton onClick={this.selectFood}>
-                <div className="colour-cell" style={{ backgroundColor: "orange" }}></div>
+                <ColourSquare colour="orange" />
               </StyledButton>
               <span>Food Count: {food.length}</span>
             </CenteredRow>
@@ -252,7 +268,10 @@ class App extends Component<{}, IAppState> {
         </div>
         <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
           <TitledContainer title="Current Mode">
-            <p className="current-mode">{mode !== "snake" ? mode : chosenId}</p>
+            <div className="current-mode">
+              <ColourSquare colour={mode === "food" ? "orange" : mode === "you" ? "#22aa34" : chosenId} />
+              <span style={{ marginLeft: 10 }}>{mode !== "snake" ? mode : chosenId}</span>
+            </div>
           </TitledContainer>
           <Board boardState={this.buildBoardState()} onChange={this.selectCell} />
         </div>

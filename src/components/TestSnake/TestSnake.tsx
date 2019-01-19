@@ -12,7 +12,7 @@ export interface ITestSnakeProps {
 
 interface ITestSnakeState {
   url: string;
-  response: string;
+  response?: string;
 }
 
 export class TestSnake extends React.Component<ITestSnakeProps, ITestSnakeState> {
@@ -21,8 +21,7 @@ export class TestSnake extends React.Component<ITestSnakeProps, ITestSnakeState>
     super(props);
 
     this.state = {
-      url: "http://localhost:5000",
-      response: "Up"
+      url: "http://localhost:5000"
     }
   }
 
@@ -47,8 +46,8 @@ export class TestSnake extends React.Component<ITestSnakeProps, ITestSnakeState>
     return (
       <TitledContainer title="Test Snake">
         <CenteredRow>
-          <StyledInput title="URL" value={url} />
-          <span>Move: {response}</span>
+          <StyledInput title="URL" value={url} onChange={event => this.setState({ url: event.target.value })} />
+          {response && <span>Move: {response}</span>}
         </CenteredRow>
         <CenteredRow>
           <StyledButton onClick={this.sendBoard}>Ping Snake</StyledButton>

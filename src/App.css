@@ -18,12 +18,14 @@ h3  {
 }
 
 .current-mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-transform: capitalize;
   font-weight: 500;
   font-size: 1.2em;
   margin-top: 10px;
   margin-bottom: 0px;
-  text-align: center;
 }
 
 @media only screen and (max-width: 768px) {
