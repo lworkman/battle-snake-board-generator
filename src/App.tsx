@@ -13,6 +13,9 @@ import { generateColour, generateId } from './shared/utils';
 import { TestSnake } from './components/TestSnake/TestSnake';
 import { CenteredRow } from './components/CenteredRow/CenteredRow';
 import { ColourSquare } from './components/ColourSquare/ColourSquare';
+import { FoodControl } from './components/FoodControl/FoodControl';
+import { YouControl } from './components/YouControl/YouControl';
+import { OtherSnakesControl } from './components/OtherSnakesControl/OtherSnakesControl';
 
 interface IAppState {
   id: string;
@@ -33,7 +36,6 @@ interface IAppState {
   };
   mode: "food" | "you" | "snake";
   chosenId: string;
-  lastMove: string;
 }
 
 class App extends Component<{}, IAppState> {
@@ -54,8 +56,7 @@ class App extends Component<{}, IAppState> {
         id: "you"
       },
       mode: "food",
-      chosenId: "",
-      lastMove: ""
+      chosenId: ""
     }
   }
 
@@ -87,7 +88,7 @@ class App extends Component<{}, IAppState> {
   }
 
   private checkIfCellConnected: (x: number, y: number, body: ICoordinate[]) => boolean = (x, y, body) => {
-    return body.some(segment => (Math.abs(segment.x - x) === 1 && segment.y === y)|| (Math.abs(segment.y - y) === 1 && segment.x === x));
+    return body.some(segment => (Math.abs(segment.x - x) === 1 && segment.y === y) || (Math.abs(segment.y - y) === 1 && segment.x === x));
   }
 
 
@@ -225,46 +226,56 @@ class App extends Component<{}, IAppState> {
 
   public changeBoardWidth = (width: string) => this.setState({ width });
 
+  public uploadBoard = (board: string) => {
+    try {
+      const uploadedState: IBoardState = JSON.parse(board);
+      this.setState({
+        id: generateId(),
+        height: uploadedState.board.height.toString(),
+        width: uploadedState.board.width.toString(),
+        food: uploadedState.board.food,
+        snakes: uploadedState.board.snakes.map(snake => {
+          const colour: string = generateColour();
+          return {
+            id: colour,
+            colour: colour,
+            body: snake.body,
+            health: snake.health.toString(),
+          }
+        }),
+        you: {
+          colour: "#22aa34",
+          body: uploadedState.you.body,
+          health: uploadedState.you.health.toString(),
+          id: "you"
+        },
+        mode: "food",
+        chosenId: ""
+      });
+    } catch (e) {
+      alert("That didn't work");
+    }
+  }
+
   render() {
 
-    const { height, width, snakes, you, lastMove, food, mode, chosenId } = this.state;
+    const { height, width, snakes, you, food, mode, chosenId } = this.state;
 
     return (
       <div className="App">
         <div className="control-container">
-          <TitledContainer title="You">
-            <SnakeControl selectSnake={this.selectYou} colour={you.colour} health={you.health} changeHealth={(value) => this.changeSnakeHealth(value, "you")} />
-          </TitledContainer>
-          <TitledContainer title="Other Snakes">
-            <div style={{ minHeight: "68px" }}>
-              {snakes.map(snake =>
-                <div key={snake.colour} style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", margin: "5px" }}>
-                  <SnakeControl selectSnake={() => this.selectSnake(snake.id)} colour={snake.colour} health={snake.health} title={snake.colour} changeHealth={(value) => this.changeSnakeHealth(value, snake.id)} />
-                </div>
-              )}
-            </div>
-            <StyledButton onClick={this.addSnake}>Add Snake</StyledButton>
-          </TitledContainer>
-          <TitledContainer title="Food">
-            <CenteredRow>
-              <StyledButton onClick={this.selectFood}>
-                <ColourSquare colour="orange" />
-              </StyledButton>
-              <span>Food Count: {food.length}</span>
-            </CenteredRow>
-          </TitledContainer>
-          <TitledContainer title="Board">
-            <BoardControls
-              boardState={this.buildBoardState()}
-              changeHeight={this.changeBoardHeight}
-              changeWidth={this.changeBoardWidth}
-              height={height}
-              width={width}
-              uploadBoard={console.log}
-            />
-          </TitledContainer>
+          <YouControl selectYou={this.selectYou} colour={you.colour} health={you.health} changeHealth={(value) => this.changeSnakeHealth(value, "you")} />
+          <OtherSnakesControl addSnake={this.addSnake} changeSnakeHealth={this.changeSnakeHealth} selectSnake={this.selectSnake} snakes={snakes} />
+          <FoodControl foodCount={food.length} selectFood={this.selectFood} />
+          <BoardControls
+            boardState={this.buildBoardState()}
+            changeHeight={this.changeBoardHeight}
+            changeWidth={this.changeBoardWidth}
+            height={height}
+            width={width}
+            uploadBoard={this.uploadBoard}
+          />
           <TestSnake boardState={this.buildBoardState()} />
-          {lastMove}
         </div>
         <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
           <TitledContainer title="Current Mode">
