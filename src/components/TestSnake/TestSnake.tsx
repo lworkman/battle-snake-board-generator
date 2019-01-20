@@ -25,6 +25,13 @@ export class TestSnake extends React.Component<ITestSnakeProps, ITestSnakeState>
     }
   }
 
+  public componentDidMount() {
+    window.addEventListener("keypress", (event) => {
+      if (event.key === " " && (!event.target || (event.target as any).tagName !== "INPUT")) {
+        this.sendBoard();
+      }
+    });
+  }
 
   public sendBoard = () => {
 

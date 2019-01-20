@@ -91,8 +91,6 @@ class App extends Component<{}, IAppState> {
     return body.some(segment => (Math.abs(segment.x - x) === 1 && segment.y === y) || (Math.abs(segment.y - y) === 1 && segment.x === x));
   }
 
-
-
   public selectCell = (x: number, y: number, id: string) => {
 
     const { mode, food, you, snakes, chosenId } = this.state;
@@ -285,6 +283,9 @@ class App extends Component<{}, IAppState> {
             </div>
           </TitledContainer>
           <Board boardState={this.buildBoardState()} onChange={this.selectCell} />
+          <TitledContainer title="Keyboard Shortcuts">
+            <p>Spacebar: Ping Snake</p>
+          </TitledContainer>
         </div>
         <div>
         </div>

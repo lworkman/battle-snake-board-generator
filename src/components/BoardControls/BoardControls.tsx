@@ -1,6 +1,6 @@
 import React from "react";
 import { StyledInput } from "../StyledInput/StyledInput";
-import { onChangeNumberLimitFactory } from "../../shared/utils";
+import { onChangeNumberLimitFactory, onBlurSetMinimumFactory } from "../../shared/utils";
 import { StyledButton } from "../StyledButton/StyledButton";
 import { CenteredRow } from "../CenteredRow/CenteredRow";
 import { TitledContainer } from "../TitledContainer/TitledContainer";
@@ -52,8 +52,8 @@ export class BoardControls extends React.Component<IBoardControls, IBoardControl
     return (
       <TitledContainer title="Board">
         <CenteredRow>
-          <StyledInput title="Height" value={height} onChange={onChangeNumberLimitFactory(changeHeight)} />
-          <StyledInput title="Width" value={width} onChange={onChangeNumberLimitFactory(changeWidth)} />
+          <StyledInput title="Height" value={height} onBlur={onBlurSetMinimumFactory(changeHeight, 1)} onChange={onChangeNumberLimitFactory(changeHeight)} />
+          <StyledInput title="Width" value={width} onBlur={onBlurSetMinimumFactory(changeWidth, 1)} onChange={onChangeNumberLimitFactory(changeWidth)} />
         </CenteredRow>
         <CenteredRow>
           <StyledInput placeholder="Past Board Here" onChange={event => this.setBoardString(event.target.value)} />
@@ -61,7 +61,7 @@ export class BoardControls extends React.Component<IBoardControls, IBoardControl
         </CenteredRow>
         <CenteredRow>
           <StyledButton onClick={this.copyBoardState}>Copy Board State</StyledButton>
-          <input ref={ref => this.boardCopyInput = ref} type="text" readOnly value={boardString} style={{ position: "absolute", top: -10000 }} />
+          <input tabIndex={-1} ref={ref => this.boardCopyInput = ref} type="text" readOnly value={boardString} style={{ position: "absolute", top: -10000 }} />
           <StyledButton href={"data:text/json;charset=utf-8," + encodeURIComponent(boardString)} download={`board-${boardState.game.id}.json`}>Download Board State</StyledButton>
         </CenteredRow>
       </TitledContainer>

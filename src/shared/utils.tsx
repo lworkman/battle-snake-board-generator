@@ -22,4 +22,18 @@ export const onChangeNumberLimitFactory = (target: (...arg: any) => void, max: n
   }
 }
 
+export const onBlurSetMinimumFactory = (target: (...arg: any) => void, min: number = 0) => {
+  return (event: React.FocusEvent<HTMLInputElement>, ) => {
+    let value = event.target.value;
+
+    if (/[\D]/.test(value)) {
+      return;
+    }
+    if (parseInt(value, 10) < min || !value) {
+      value = min.toString();
+    }
+    target(value);
+  }
+}
+
 export const generateId = () => Math.floor((Math.random() * 1000000)).toString()
