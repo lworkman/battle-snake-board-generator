@@ -160,12 +160,17 @@ class App extends Component<{}, IAppState> {
         food: this.state.food,
         height: parseInt(this.state.height, 10),
         width: parseInt(this.state.width, 10),
-        snakes: this.state.snakes.map(snake => ({
+        snakes: [{
+          health: parseInt(this.state.you.health, 10),
+          id: "you",
+          name: this.state.you.colour,
+          body: this.state.you.body
+        }].concat(this.state.snakes.map(snake => ({
           health: parseInt(snake.health, 10),
           id: snake.id,
           name: snake.colour,
           body: snake.body
-        }))
+        })))
       }
     }
   }
