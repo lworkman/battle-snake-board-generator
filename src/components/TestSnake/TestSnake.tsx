@@ -36,8 +36,9 @@ export class TestSnake extends React.Component<ITestSnakeProps, ITestSnakeState>
   public sendBoard = () => {
 
     const { boardState } = this.props;
+    const { url } = this.state;
 
-    fetch("http://localhost:5000/move", {
+    fetch(url, {
       body: JSON.stringify(boardState),
       method: "POST",
       headers: [
