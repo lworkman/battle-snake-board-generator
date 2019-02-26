@@ -237,7 +237,7 @@ class App extends Component<{}, IAppState> {
         height: uploadedState.board.height.toString(),
         width: uploadedState.board.width.toString(),
         food: uploadedState.board.food,
-        snakes: uploadedState.board.snakes.map(snake => {
+        snakes: uploadedState.board.snakes.filter(snake => snake.id !== uploadedState.you.id).map(snake => {
           const colour: string = generateColour();
           return {
             id: colour,
